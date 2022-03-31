@@ -37,19 +37,15 @@ def section_window(dataframes, section_num):
     window.close()
 
 def player_window(dataframes, player_name, section_num):
-    option_points = (0, 10)
-    # S'HA DE PENSAR COM GUARDAR-HO BÉ..
-    peus = 0
     # -- GUI definition --
     window_name = 'Secció ' + section_num + '- ' + player_name
     layout = [
         [sg.Text(window_name, font=('Calibri', 15), text_color='White')],
-        [sg.Text('Porta 1: ', font=('Calibri', 15)), sg.InputOptionMenu(option_points)],
-        [sg.Text('Porta 2: ', font=('Calibri', 15)), sg.InputOptionMenu(option_points)],
-        [sg.Text('Porta 3: ', font=('Calibri', 15)), sg.InputOptionMenu(option_points)],
-        [sg.Text('Porta 4: ', font=('Calibri', 15)), sg.InputOptionMenu(option_points)],
-        [sg.Text('Porta 5: ', font=('Calibri', 15)), sg.InputOptionMenu(option_points)],
-        [sg.Text('Peus: ' + str(peus), font=('Calibri', 15), key='peus_output'), sg.Button('+1', key='peus+', font=('Calibri', 15)), sg.Button('-1', key='peus-', font=('Calibri', 15))],
+        [sg.Text('Porta 1: ', font=('Calibri', 15)), sg.Button('0', key='zero1', font=('Calibri', 15)), sg.Button('10', key='ten1', font=('Calibri', 15)), sg.Button('-', key='empty1', font=('Calibri', 15))],
+        [sg.Text('Porta 2: ', font=('Calibri', 15)), sg.Button('0', key='zero2', font=('Calibri', 15)), sg.Button('10', key='ten2', font=('Calibri', 15)), sg.Button('-', key='empty2', font=('Calibri', 15))],
+        [sg.Text('Porta 3: ', font=('Calibri', 15)), sg.Button('0', key='zero3', font=('Calibri', 15)), sg.Button('10', key='ten3', font=('Calibri', 15)), sg.Button('-', key='empty3', font=('Calibri', 15))],
+        [sg.Text('Porta 4: ', font=('Calibri', 15)), sg.Button('0', key='zero4', font=('Calibri', 15)), sg.Button('10', key='ten4', font=('Calibri', 15)), sg.Button('-', key='empty4', font=('Calibri', 15))],
+        [sg.Text('Porta 5: ', font=('Calibri', 15)), sg.Button('0', key='zero5', font=('Calibri', 15)), sg.Button('10', key='ten5', font=('Calibri', 15)), sg.Button('-', key='empty5', font=('Calibri', 15))],
         [sg.Button('Actualitzar', key = 'update', font=('Calibri', 15))]
     ]
 
@@ -57,18 +53,24 @@ def player_window(dataframes, player_name, section_num):
     # -- Loop & Process menu choices --
     while True:
         event, values = window.read()
+        # Try/except per què quan es tanca la pestanya no és un string
+        try:
+            # Per no fer tants ifs
+            point = event[:-1]
+            porta = event[-1]
+        except:
+            pass
+
         if event in (sg.WIN_CLOSED, 'Exit'):
             break
-        if event == 'peus+':
-            peus += 1
-            window['peus_output'].update('Peus: ' + str(peus))
-            Dataframes.changePeus(dataframes, peus, '+')
-        if event == 'peus-':
-            peus -= 1
-            window['peus_output'].update('Peus: ' + str(peus))
-            Dataframes.changePeus(dataframes, peus, '-')
         if event == 'update':
-            Dataframes.updateData(dataframes, values, peus, section_num, player_name)
+            Dataframes.updateData(dataframes, values, porta, section_num, player_name)
+        if point == 'zero':
+            Dataframes.updateData(dataframes, '0', porta, section_num, player_name)
+        if point == 'ten':
+            Dataframes.updateData(dataframes, '10', porta, section_num, player_name)
+        if point == 'empty':
+            Dataframes.updateData(dataframes, '-', porta, section_num, player_name)
 
     window.close()
 
@@ -89,14 +91,19 @@ def selectSection_window(dataframes):
         if event in (sg.WIN_CLOSED, 'Exit'):
             break
         if event == 'section1':
+            Dataframes.updateSection(dataframes, '1')
             section_window(dataframes, '1')
         if event == 'section2':
+            Dataframes.updateSection(dataframes, '2')
             section_window(dataframes, '2')
         if event == 'section3':
+            Dataframes.updateSection(dataframes, '3')
             section_window(dataframes, '3')
         if event == 'section4':
+            Dataframes.updateSection(dataframes, '4')
             section_window(dataframes, '4')
         if event == 'section5':
+            Dataframes.updateSection(dataframes, '5')
             section_window(dataframes, '5')
 
     window.close()

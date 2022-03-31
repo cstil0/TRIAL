@@ -11,6 +11,7 @@ class Dataframes:
         self.dataRaw = None
         self.trialRaw = None
         self.playerRaw = None
+        self.puntsPortes = None
 
         self.qualifyingPlayers = None
         self.finalPlayers = None
@@ -52,6 +53,18 @@ class Dataframes:
         # Concatenem en un mateix dataframe
         self.finalPlayers = pd.concat(final_players_clean, axis=1, keys=col_names)
 
+    def create_PuntsPortes(self):
+        # Creem un nou dataframe a partir dels noms dels jugadors i anem afegint les portes per secció
+        data = [self.finalPlayers['SORTIDA'], self.finalPlayers['NOM']]
+        headers = ['SORTIDA', 'NOM']
+        self.puntsPortes = pd.concat(data, axis=1, keys=headers)
+
+        fill = ['-','-','-','-','-', '-']
+        for section in range (1, 6):
+            for porta in range (1, 7):
+                self.puntsPortes['P' + str(porta) + '_S' + str(section)] = fill
+        print(self.puntsPortes)
+
     # -- Load excel --
     def getColNames(self, cols_num, row_num):
         col_names = []
@@ -71,6 +84,7 @@ class Dataframes:
         print(self.trialRaw)
 
     def createDataframes(self, qualifying_players_num, final_players_num, cols_num, row_num):
+        # S'HAN DE GUARDAR TAMBÉ ELS PUNTS PER PORTA!!
         self.loadExcel()
 
         col_names_qual = self.getColNames(cols_num, row_num)
@@ -81,6 +95,8 @@ class Dataframes:
         col_names_final = self.getColNames(cols_num + 7, row_num_final)
         self.create_finalPlayers(col_names_final, cols_num + 7, row_num_final, qualifying_players_num)
         print(self.finalPlayers)
+
+        self.create_PuntsPortes()
 
         # NO SÉ SI AIXÒ FA FALTA, JA QUE REALMENT JA HO GUARDA L'EXCEL ORIGINAL AL LLOC QUE TOCA
         # I TAMPOC TÉ MASSA SENTIT GUARDAR-HO CADA VEGADA A NO SER QUE PUGUI CANVIAR EN ALGUN MOMENT
@@ -93,30 +109,112 @@ class Dataframes:
         return self
 
     # -- Export dataframes --
-    def updateData(self, portes, peus_points, section_num, player_name):
-        # Sumem els punts de l'input
-        curr_total = 0
-        portes_points = portes.values()
-        for point in portes_points:
-            if point == '10':
-                curr_total += int(point)
-        # Mirem el total de punts anterior per saber d'on hem de restar un punt a les columnes de punts 60-0
-        # FALTARIA CONTROLAR QUAN ES CANVII DE 10 A 0 JA QUE PETARIA
-        # AQUESTA LÍNEA ESTÀ AGAFANT TOTA LA COLUMNA TOTAL -- NOMÉS VOLEM EL VALOR DE LA FILA DEL PLAYER_NAME
-        last_total = self.finalPlayers['TOTAL']
-        curr_total += last_total
-
-        # S'HA DE MIRAR DE TREURE EL .0 DEL NOM DE LA COLUMNA
-        print(curr_total)
-        print(' TOTAL: ' + str(curr_total) + '.0')
-        print(self.finalPlayers[str(curr_total) + '.0'])
-        #self.finalPlayers[str(curr_total) + '.0'] = self.finalPlayers[str(curr_total) + '.0'] + 1
-        #self.finalPlayers[str(last_total) + '.0'] = self.finalPlayers[str(last_total) + '.0'] - 1
-
-        self.finalPlayers['TOTAL'] = curr_total
-
-        # FALTA ORDENAR PER NOMBRE DE PUNTS A CADA COLUMNA 60-0 O PER SORTIDA EN EL CAS QUE HI HAGI EMPAT
+    def sortPlayers(self):
+        # Ordenem en aquest ordre en el cas que hi hagi empats
+        self.finalPlayers = self.finalPlayers.sort_values(by=[60.0,50, 40.0, 30.0, 20.0, 10.0, 'SORTIDA'], ascending=[False, False, False, False, False, False, True])
         print(self.finalPlayers)
+
+    def saveExcel(self):
+        path_export = 'TRIAL_VMIX.xlsx'
+        with pd.ExcelWriter(path_export) as writer:
+            self.vmixRaw.to_excel(writer, sheet_name='VMIX')
+            self.dataRaw.to_excel(writer, sheet_name='DADES')
+            self.trialRaw.to_excel(writer, sheet_name='TRIAL')
+            self.playerRaw.to_excel(writer, sheet_name='PLAYER1')
+
+
+    def exportDataframe(self, section_num):
+        # Iterem cada fila i anem guardant cada valor on toca
+        player_i = 1
+        # Recorrem dataframe de players
+        for index, row in self.finalPlayers.iterrows():
+            # FALTEN COSES PER GUARDAR
+            self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
+
+            self.vmixRaw.loc[0, 'F_ABR_' + str(player_i)] = row['ABR']
+            self.vmixRaw.loc[0, 'F_BANDERA_' + str(player_i)] = row['BANDERA']
+            self.vmixRaw.loc[0, 'F_PAIS_' + str(player_i)] = row['PAIS']
+            self.vmixRaw.loc[0, 'F_PLAYER_' + str(player_i)] = row['NOM']
+            self.vmixRaw.loc[0, 'F_PUNTS_' + str(player_i)] = row['TOTAL']
+            # ÉS NECESSARI FER-HO AIXÒ?? PODEM GUARDAR-HO NOMÉS A LA SECCIÓ ACTUAL?
+            for section in range(1, 6):
+                self.vmixRaw.loc[0, 'F_S' + str(section) + '_' + str(player_i)] = row['SECCIÓ ' + str(section)]
+                self.vmixRaw.loc[0, str(player_i) + '_PUNTS_SECCIO'] = row['SECCIÓ ' + str(section_num)]
+
+            player_i+=1
+
+        # Recorrem dataframe de portes
+        player_i = 1
+        for index, row in self.puntsPortes.iterrows():
+            for porta in range(1, 7):
+                self.vmixRaw.loc[0, str(player_i) + '_PUNTS_P' + str(porta)] = row['P' + str(porta) + '_S' + str(section_num)]
+            player_i += 1
+        print(self.puntsPortes)
+
+    def updateSection(self, section_num):
+        # Iterem cada fila i actualitzem només la secció actual
+        player_i = 1
+        # Recorrem dataframe de players
+        for index, row in self.finalPlayers.iterrows():
+            # FALTEN COSES PER GUARDAR
+            self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
+
+        self.saveExcel()
+
+    def updateData(self, point, porta_num, section_num, player_name):
+        #portes_points = portes.values()
+        curr_total = 0
+        # Primer busquem a quina fila està el nom del player seleccionat --> estarà al [0] de la llista que retorna la funció index
+        row_index = self.puntsPortes.index[self.puntsPortes['NOM'] == player_name].tolist()[0]
+
+        # AQUÍ HE FET UNA LIADA, SERIA MOLT MÉS SENCILL GUARDAR ELS PUNTS DE LES PORTES AL DATAFRAME I SUMAR D'ALLÀ
+        # Guardem els punts de cada porta al dataframe
+        #i = 1
+        #for point in portes_points:
+        #    if point == '0' or point == '10':
+        #        # Actualitzem punts només si s'han introduit
+        #        self.puntsPortes.loc[row_index, 'P' + str(i) + '_S' + str(section_num)] = int(point)
+        #    i += 1
+
+        # Actualitzem només els punts de la porta introduida
+        # Try/except per si és '-' ja que no ho podrà convertir a int
+        try:
+            self.puntsPortes.loc[row_index, 'P' + porta_num + '_S' + str(section_num)] = int(point)
+        except:
+            self.puntsPortes.loc[row_index, 'P' + porta_num + '_S' + str(section_num)] = point
+
+        # Recorrem totes les portes de la secció i sumem els punts
+        # Així és més fàcil si es canvia de 10 a 0 per exemple i coses així (CREC, PER QUE S'HA DE CONTROLAR AQUEST CAS MÉS AVALL)
+        for j in range (1, 7):
+            curr_point = self.puntsPortes.loc[row_index, 'P' + str(j) + '_S' + str(section_num)]
+            if curr_point == 10:
+                curr_total += int(curr_point)
+
+        # Mirem el total de punts anterior de la secció per saber d'on hem de restar un punt a les columnes de punts 60-0
+        # FALTARIA CONTROLAR QUAN ES CANVII DE 10 A 0 JA QUE PETARIA
+        # Primer busquem a quina fila està el nom del player seleccionat --> estarà al [0] de la llista que retorna la funció index (és diferent a la de les portes per què s'ordena)
+        row_index = self.finalPlayers.index[self.finalPlayers['NOM'] == player_name].tolist()[0]
+        # Busquem el total que hi ha en aquella secció per aquell player
+        last_total_section = self.finalPlayers.loc[row_index, 'SECCIÓ ' + section_num]
+        last_total = self.finalPlayers.loc[row_index, 'TOTAL']
+
+        # Necessitem saber quina diferència hi ha entre el total actual i l'anterior, i això serà el que sumarem
+        # SI FOS NEGATIU SIGNIFICARIA QUE S'HAN EQUIVOCAT I HAN PASSAT DE 10 A 0 E.G --> CREC QUE HO ARREGLA SOL PER QUÈ COM QUE ESTÀ SUMANT, LI RESTARIA EL 10 AL TOTAL JA QUE ES NEGATIU :)
+        added_total = curr_total - last_total_section
+        curr_total_section = added_total + last_total_section
+
+        # Ho sumem tant a la secció com al total general
+        self.finalPlayers.loc[row_index, 'SECCIÓ ' + section_num] = curr_total_section
+        self.finalPlayers.loc[row_index, 'TOTAL'] = last_total + added_total
+
+        # Convertim el total a float per què així es guarda el nom de la columna
+        # MOLARIA MÉS POTSER FER-HO COMPTANT QUANTS DE CADA N'HI HA
+        self.finalPlayers.loc[row_index, float(curr_total)] = self.finalPlayers.loc[row_index, curr_total] + 1
+        self.finalPlayers.loc[row_index, float(last_total_section)] = self.finalPlayers.loc[row_index, last_total_section] - 1
+
+        self.sortPlayers()
+        self.exportDataframe(section_num)
+        self.saveExcel()
 
     # NO SÉ SI FA FALTA, POTSER ES POT GUARDAR EN LOCAL A LA GUI
     def changePeus(self, peus_points, add_subs):
