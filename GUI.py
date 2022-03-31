@@ -45,8 +45,8 @@ def player_window(dataframes, player_name, section_num):
         [sg.Text('Porta 2: ', font=('Calibri', 15)), sg.Button('0', key='zero2', font=('Calibri', 15)), sg.Button('10', key='ten2', font=('Calibri', 15)), sg.Button('-', key='empty2', font=('Calibri', 15))],
         [sg.Text('Porta 3: ', font=('Calibri', 15)), sg.Button('0', key='zero3', font=('Calibri', 15)), sg.Button('10', key='ten3', font=('Calibri', 15)), sg.Button('-', key='empty3', font=('Calibri', 15))],
         [sg.Text('Porta 4: ', font=('Calibri', 15)), sg.Button('0', key='zero4', font=('Calibri', 15)), sg.Button('10', key='ten4', font=('Calibri', 15)), sg.Button('-', key='empty4', font=('Calibri', 15))],
-        [sg.Text('Porta 5: ', font=('Calibri', 15)), sg.Button('0', key='zero5', font=('Calibri', 15)), sg.Button('10', key='ten5', font=('Calibri', 15)), sg.Button('-', key='empty5', font=('Calibri', 15))],
-        [sg.Button('Actualitzar', key = 'update', font=('Calibri', 15))]
+        [sg.Text('Porta 5: ', font=('Calibri', 15)), sg.Button('0', key='zero5', font=('Calibri', 15)), sg.Button('10', key='ten5', font=('Calibri', 15)), sg.Button('-', key='empty5', font=('Calibri', 15))]
+        #[sg.Button('Actualitzar', key = 'update', font=('Calibri', 15))]
     ]
 
     window = sg.Window(window_name, layout)
@@ -63,8 +63,8 @@ def player_window(dataframes, player_name, section_num):
 
         if event in (sg.WIN_CLOSED, 'Exit'):
             break
-        if event == 'update':
-            Dataframes.updateData(dataframes, values, porta, section_num, player_name)
+        #if event == 'update':
+            #Dataframes.updateData(dataframes, values, porta, section_num, player_name)
         if point == 'zero':
             Dataframes.updateData(dataframes, '0', porta, section_num, player_name)
         if point == 'ten':
@@ -88,22 +88,18 @@ def selectSection_window(dataframes):
     # -- Loop & Process menu choices --
     while True:
         event, values = window.read()
+        # Try/except per què quan es tanca la pestanya no és un string
+        try:
+            # Per no fer tants ifs
+            event_clean = event[:-1]
+            section = event[-1]
+        except:
+            pass
+
         if event in (sg.WIN_CLOSED, 'Exit'):
             break
-        if event == 'section1':
-            Dataframes.updateSection(dataframes, '1')
-            section_window(dataframes, '1')
-        if event == 'section2':
-            Dataframes.updateSection(dataframes, '2')
-            section_window(dataframes, '2')
-        if event == 'section3':
-            Dataframes.updateSection(dataframes, '3')
-            section_window(dataframes, '3')
-        if event == 'section4':
-            Dataframes.updateSection(dataframes, '4')
-            section_window(dataframes, '4')
-        if event == 'section5':
-            Dataframes.updateSection(dataframes, '5')
-            section_window(dataframes, '5')
+        if event_clean == 'section':
+            Dataframes.updateSection(dataframes, section)
+            section_window(dataframes, section)
 
     window.close()
