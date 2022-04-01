@@ -53,6 +53,9 @@ class Dataframes:
         # Concatenem en un mateix dataframe
         self.finalPlayers = pd.concat(final_players_clean, axis=1, keys=col_names)
 
+        # Resetejem index per què comenci a 0
+        self.finalPlayers['row_num'] = self.finalPlayers.reset_index().index
+
     def create_PuntsPortes(self):
         # Creem un nou dataframe a partir dels noms dels jugadors i anem afegint les portes per secció
         data = [self.finalPlayers['SORTIDA'], self.finalPlayers['NOM']]
@@ -112,6 +115,8 @@ class Dataframes:
     def sortPlayers(self):
         # Ordenem en aquest ordre en el cas que hi hagi empats
         self.finalPlayers = self.finalPlayers.sort_values(by=[60.0,50, 40.0, 30.0, 20.0, 10.0, 'SORTIDA'], ascending=[False, False, False, False, False, False, True])
+        # Resetejem index per què comenci a 0, però només si no s'ha resetejat encara, ja que sinó peta
+        self.finalPlayers['row_num'] = self.finalPlayers.reset_index().index
         print(self.finalPlayers)
 
     def saveExcel(self):
@@ -123,12 +128,21 @@ class Dataframes:
             self.playerRaw.to_excel(writer, sheet_name='PLAYER1')
 
 
-    def exportDataframe(self, section_num):
+    def exportDataframe(self, section_num, player_name):
+        # Agafem l'index del player sabent que estan ordenats al row_num
+        # En aquest cas ho fem així i no amb l'index per què ho necessitem per saber la cel·La a la que s'ha de guardar, i per tant utilitzem iloc que no es fixa en l'index sino en l'ordre de files
+        player_i = self.finalPlayers.loc[self.finalPlayers['NOM'] == player_name, 'row_num'].iloc[0]
+        # Recorrem dataframe de players i guardem primer les dades que es mostren per un sol player
+        self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
+        self.vmixRaw.loc[0, 'C_BANDERA'] = self.finalPlayers.iloc[player_i]['BANDERA']
+        self.vmixRaw.loc[0, 'C_PAIS'] = self.finalPlayers.iloc[player_i]['PAIS']
+        self.vmixRaw.loc[0, 'C_PLAYER'] = self.finalPlayers.iloc[player_i]['NOM']
+        self.vmixRaw.loc[0, 'C_PUNTS_SECCIO'] = self.finalPlayers.iloc[player_i]['SECCIÓ ' + str(section_num)]
+
+        # El resum de resultats es mostra per tots els jugadors per tant ho recorrem tot per si ha canviat l'ordre
         # Iterem cada fila i anem guardant cada valor on toca
         player_i = 1
-        # Recorrem dataframe de players
         for index, row in self.finalPlayers.iterrows():
-            # FALTEN COSES PER GUARDAR
             self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
 
             self.vmixRaw.loc[0, 'F_ABR_' + str(player_i)] = row['ABR']
@@ -136,28 +150,31 @@ class Dataframes:
             self.vmixRaw.loc[0, 'F_PAIS_' + str(player_i)] = row['PAIS']
             self.vmixRaw.loc[0, 'F_PLAYER_' + str(player_i)] = row['NOM']
             self.vmixRaw.loc[0, 'F_PUNTS_' + str(player_i)] = row['TOTAL']
-            # ÉS NECESSARI FER-HO AIXÒ?? PODEM GUARDAR-HO NOMÉS A LA SECCIÓ ACTUAL?
+
             for section in range(1, 6):
                 self.vmixRaw.loc[0, 'F_S' + str(section) + '_' + str(player_i)] = row['SECCIÓ ' + str(section)]
                 self.vmixRaw.loc[0, str(player_i) + '_PUNTS_SECCIO'] = row['SECCIÓ ' + str(section_num)]
 
             player_i+=1
 
-        # Recorrem dataframe de portes
-        player_i = 1
-        for index, row in self.puntsPortes.iterrows():
-            for porta in range(1, 7):
-                self.vmixRaw.loc[0, str(player_i) + '_PUNTS_P' + str(porta)] = row['P' + str(porta) + '_S' + str(section_num)]
-            player_i += 1
+        # Recorrem les portes del player sol ja que només es mostra per un
+        player_i = self.puntsPortes.index[self.puntsPortes['NOM'] == player_name].tolist()[0]
+        for porta in range(1, 7):
+            self.vmixRaw.loc[0, 'C_PUNTS_P' + str(porta)] = self.puntsPortes.loc[player_i, 'P' + str(porta) + '_S' + str(section_num)]
         print(self.puntsPortes)
 
     def updateSection(self, section_num):
-        # Iterem cada fila i actualitzem només la secció actual
-        player_i = 1
-        # Recorrem dataframe de players
-        for index, row in self.finalPlayers.iterrows():
-            # FALTEN COSES PER GUARDAR
-            self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
+        # Actualitzem només la cel·la que es mostra amb la info del player
+        self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
+        self.saveExcel()
+
+    def updatePlayer(self, player_name):
+        # Agafem index player
+        row_index = self.finalPlayers.index[self.finalPlayers['NOM'] == player_name].tolist()[0]
+
+        # Update
+        self.vmixRaw.loc[0, 'I_PAIS_1'] = self.finalPlayers.loc[row_index]['PAIS']
+        self.vmixRaw.loc[0, 'I_PLAYER_1'] = player_name
 
         self.saveExcel()
 
@@ -213,7 +230,7 @@ class Dataframes:
         self.finalPlayers.loc[row_index, float(last_total_section)] = self.finalPlayers.loc[row_index, last_total_section] - 1
 
         self.sortPlayers()
-        self.exportDataframe(section_num)
+        self.exportDataframe(section_num, player_name)
         self.saveExcel()
 
     # NO SÉ SI FA FALTA, POTSER ES POT GUARDAR EN LOCAL A LA GUI
