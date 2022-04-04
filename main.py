@@ -3,6 +3,7 @@ import os
 
 from loadDataframes import Dataframes
 import GUI
+import streamdeckControl
 
 if __name__ == '__main__':
     excel_path = 'TRIAL.xlsx'
@@ -18,5 +19,10 @@ if __name__ == '__main__':
     row_num = 2
     dataframes = Dataframes.createDataframes(dataframes, qualifying_players_num, final_players_num, cols_num, row_num)
 
+    # Initialize streamdeck
+    streamdeckControl.initiate_streamdeck(dataframes)
+
     # Open window GUI
     GUI.selectSection_window(dataframes)
+
+

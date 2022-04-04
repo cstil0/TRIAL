@@ -7,12 +7,14 @@ class Dataframes:
     def __init__(self, path):
         self.excelPath = path
 
+        # Raw datasets
         self.vmixRaw = None
         self.dataRaw = None
         self.trialRaw = None
         self.playerRaw = None
-        self.puntsPortes = None
 
+        # Clean datasets
+        self.puntsPortes = None
         self.qualifyingPlayers = None
         self.finalPlayers = None
         self.startTitle = None
@@ -163,6 +165,7 @@ class Dataframes:
             self.vmixRaw.loc[0, 'C_PUNTS_P' + str(porta)] = self.puntsPortes.loc[player_i, 'P' + str(porta) + '_S' + str(section_num)]
         print(self.puntsPortes)
 
+    # -- Update selections --
     def updateSection(self, section_num):
         # Actualitzem només la cel·la que es mostra amb la info del player
         self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
@@ -173,8 +176,9 @@ class Dataframes:
         row_index = self.finalPlayers.index[self.finalPlayers['NOM'] == player_name].tolist()[0]
 
         # Update
-        self.vmixRaw.loc[0, 'I_PAIS_1'] = self.finalPlayers.loc[row_index]['PAIS']
-        self.vmixRaw.loc[0, 'I_PLAYER_1'] = player_name
+        self.vmixRaw.loc[0, 'C_PAIS'] = self.finalPlayers.loc[row_index]['PAIS']
+        self.vmixRaw.loc[0, 'C_PLAYER'] = player_name
+        self.vmixRaw.loc[0, 'C_BANDERA'] =  self.finalPlayers.loc[row_index]['BANDERA']
 
         self.saveExcel()
 
@@ -232,7 +236,3 @@ class Dataframes:
         self.sortPlayers()
         self.exportDataframe(section_num, player_name)
         self.saveExcel()
-
-    # NO SÉ SI FA FALTA, POTSER ES POT GUARDAR EN LOCAL A LA GUI
-    def changePeus(self, peus_points, add_subs):
-        return
