@@ -60,8 +60,8 @@ class Dataframes:
 
     def create_PuntsPortes(self):
         # Creem un nou dataframe a partir dels noms dels jugadors i anem afegint les portes per secció
-        data = [self.finalPlayers['SORTIDA'], self.finalPlayers['NOM']]
-        headers = ['SORTIDA', 'NOM']
+        data = [self.finalPlayers['SORTIDA'], self.finalPlayers['NOM'], self.finalPlayers['ABR']]
+        headers = ['SORTIDA', 'NOM', 'ABR']
         self.puntsPortes = pd.concat(data, axis=1, keys=headers)
 
         fill = ['-','-','-','-','-', '-']
@@ -89,7 +89,6 @@ class Dataframes:
         print(self.trialRaw)
 
     def createDataframes(self, qualifying_players_num, final_players_num, cols_num, row_num):
-        # S'HAN DE GUARDAR TAMBÉ ELS PUNTS PER PORTA!!
         self.loadExcel()
 
         col_names_qual = self.getColNames(cols_num, row_num)

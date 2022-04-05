@@ -9,34 +9,101 @@ from loadDataframes import Dataframes
 
 # Folder location of image assets used by this example.
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), "Assets")
+curr_player = None
+curr_section = None
+dataframes = None
+players = None
 
 # Returns styling information for a key based on its position and state.
 def get_key_style(deck, key, state):
     # Last button in the example application is the exit button.
     exit_key_index = deck.key_count() - 1
+    font = "verdana-bold.ttf"
 
     if key >= 0 and key <= 4:
         name = "section"
         icon = "{}.png".format("green") if state else "{}.png".format("purple")
-        font = "Roboto-Regular.ttf"
-        label = "SECCIÓ {}".format(key + 1)
+        label = "SEC {}".format(key + 1)
 
     elif key >= 8 and key <= 13:
         name = "player"
         icon = "{}.png".format("green") if state else "{}.png".format("blue")
-        font = "Roboto-Regular.ttf"
-        label = "{}".format(players[key-8])
+        abreviations = list(players.keys())
+        label = "{}".format(abreviations[key-8])
 
     elif key == 5:
         name = "exit"
         icon = "{}.png".format("Exit")
-        font = "Roboto-Regular.ttf"
         label = ""
 
+    # ESTARIA GUAI FER-HO UNA MICA MÉS EFICIENT -- POTSER ES PODRIEN POSAR ELS VALORS A UN DICCIONARI I ANAR RECORRENT :)
+    elif key == 16 or key == 19 or key == 24 or key == 27 or key == 6 or key == 7:
+        icon = "{}.png".format("green_door")
+        if key == 16:
+            name = "110"
+            label = "P1\n+10"
+        if key == 24:
+            name = "210"
+            label = "P2\n+10"
+        if key == 19:
+            name = "310"
+            label = "P3\n+10"
+        if key == 27:
+            name = "410"
+            label = "P4\n+10"
+        if key == 6:
+            name = "510"
+            label = "P5\n+10"
+        if key == 7:
+            name = "610"
+            label = "P6\n+10"
+
+    elif key == 17 or key == 20 or key == 25 or key == 28 or key == 14 or key == 15:
+        icon = "{}.png".format("red")
+        if key == 17:
+            name = "10"
+            label = "P1\n+0"
+        if key == 25:
+            name = "20"
+            label = "P2\n+0"
+        if key == 20:
+            name = "30"
+            label = "P3\n+0"
+        if key == 28:
+            name = "40"
+            label = "P4\n+0"
+        if key == 14:
+            name = "50"
+            label = "P5\n+0"
+        if key == 15:
+            name = "60"
+            label = "P6\n+0"
+
+    elif key == 18 or key == 21 or key == 26 or key == 29 or key == 22 or key == 23:
+        icon = "{}.png".format("yellow")
+        if key == 18:
+            name = "1-"
+            label = "P1\n-"
+        if key == 26:
+            name = "2-"
+            label = "P2\n-"
+        if key == 21:
+            name = "3-"
+            label = "P3\n-"
+        if key == 29:
+            name = "4-"
+            label = "P4\n-"
+        if key == 22:
+            name = "5-"
+            label = "P5\n-"
+        if key == 23:
+            name = "6-"
+            label = "P6\n-"
+
+
     else:
-        name = "empty{}".format(key - 7)
+        name = "empty"
         icon = "black.png"
-        font = "Roboto-Regular.ttf"
         label = ""
 
     return {
@@ -58,8 +125,8 @@ def render_key_image(deck, icon_filename, font_filename, label_text):
     # Load a custom TrueType font and use it to overlay the key index, draw key
     # label onto the image a few pixels from the bottom of the key.
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(font_filename, 14)
-    draw.text((image.width / 2, image.height / 2), text=label_text, font=font, anchor="ms", fill="white")
+    font = ImageFont.truetype(font_filename, 28)
+    draw.text((image.width / 2, image.height / 2 + 10), text=label_text, font=font, anchor="ms", fill="white", align='center', stroke_width=1, stroke_fill='black')
 
     return PILHelper.to_native_format(deck, image)
 
@@ -85,30 +152,55 @@ def update_key_image(deck, key, state):
 # associated actions when a key is pressed.
 def key_change_callback(deck, key, state):
     # Print new key state
-    print("Deck {} Key {} = {}".format(deck.id(), key, state), flush=True)
-
-    # Actualitzem state segons el current player o section
-    # ARA MATEIX NO SE M'ACUT COM FER-HO -- POTSER TROBANT L'ULTIM QUE ESTAVA ACTIU I POSAR TANT CURRENT COM ANTIC BE
-    #for key in range(deck.key_count()):
-        #update_key_image(deck, key, False)
+    print("Key {} = {}".format(key, state), flush=True)
 
     # Update the key image based on the new key state.
-    update_key_image(deck, key, state)
+    # update_key_image(deck, key, state)
 
     # Check if the key is changing to the pressed state.
     if state:
+        # Primer agafem l'style de la key que s'ha activat
         key_style = get_key_style(deck, key, state)
 
-        # When an exit button is pressed, close the application.
-        if key_style["name"] == "player":
-            player_name = key_style['label']
-            Dataframes.updatePlayer(dataframes, player_name)
+        # Actualitzem state segons el current player o section
+        for curr_key in range(deck.key_count()):
+            # Comprovem si el nom de la key coincideix amb el current, i si tant el nou com l'antic son players o seccions per canviar només el que toca
+            curr_key_style = get_key_style(deck, curr_key, state)
+            if curr_key_style['name'] == key_style['name']:
+                # Cridem les variables globals per poder-les modificar
+                global curr_section, curr_player
+                # Mirem si estem en un player i si aquest coincideix amb el current
+                if curr_key_style['label'] == curr_player:
+                    # Actualitzem colors
+                        update_key_image(deck, curr_key, False)
+                        update_key_image(deck, key, True)
+                        # Actualitzem el nou current player
+                        curr_player = key_style['label']
 
-        if key_style["name"] == "section":
+                elif curr_key_style['label'] == curr_section:
+                    # Actualitzem colors
+                    update_key_image(deck, curr_key, False)
+                    update_key_image(deck, key, True)
+                    # Actualitzem secció
+                    curr_section = key_style['label']
+
+        # Definim comportament
+        style_name = key_style['name']
+        if style_name == "player":
+            player_abr = key_style['label']
+            Dataframes.updatePlayer(dataframes, players[player_abr])
+
+        elif style_name == "section":
             section_num = key_style['label'][-1]
             Dataframes.updateSection(dataframes, section_num)
 
-        elif key_style["name"] == "exit":
+        # Comprovem si es tracta d'alguna porta
+        elif key_style['label'][0] == 'P':
+            porta_num = style_name[0]
+            porta_punts = style_name[1:]
+            Dataframes.updateData(dataframes, porta_punts, porta_num, curr_section[-1], curr_player)
+
+        elif style_name == "exit":
             # Use a scoped-with on the deck to ensure we're the only thread
             # using it right now.
             with deck:
@@ -118,15 +210,30 @@ def key_change_callback(deck, key, state):
                 # Close deck handle, terminating internal worker threads.
                 deck.close()
 
+# Per trobar la key del diccionari donat el valor
+def get_key(val):
+    for key, value in players.items():
+        if val == value:
+            return key
+
+    return
 
 def initiate_streamdeck(data):
-    global dataframes
+    # Creem variables globals per què no podem passar-ho per paràmetre al key_change_callback
+    global dataframes, players, curr_player, curr_section
     dataframes = data
-    global players
-    players = dataframes.puntsPortes['NOM'].values.tolist()
-    global curr_player, curr_section
-    curr_player = dataframes.vmixRaw.loc[0, 'C_PLAYER']
-    curr_section = dataframes.vmixRaw.loc[0, 'SECCIO']
+    abreviations = dataframes.puntsPortes['ABR'].values.tolist()
+    names = dataframes.puntsPortes['NOM'].values.tolist()
+    # Convertim a diccionari per poder agafar tant els noms (passar per paràmetre a dataframes) com les abreviacions (streamdeck) segons us
+    players = dict(zip(abreviations, names))
+
+    # Agafem el player que hi ha guardat com a current
+    curr_player_name = dataframes.vmixRaw.loc[0, 'C_PLAYER']
+    # Trobem l'abreviació del current player -- és més fàcil treballar amb el que es mostra i canviar-ho al que toca quan enviem a dataframes
+    curr_player = get_key(curr_player_name)
+    # Agafem la secció tal com està guardada
+    curr_section_name = dataframes.vmixRaw.loc[0, 'SECCIO']
+    curr_section = 'SEC {}'.format(curr_section_name[-1])
 
     streamdecks = DeviceManager().enumerate()
 
@@ -143,7 +250,12 @@ def initiate_streamdeck(data):
 
     # Set initial key images.
     for key in range(deck.key_count()):
-        update_key_image(deck, key, False)
+        key_style = get_key_style(deck, key, False)
+        # Posem en verd els que coincideixen amb el current
+        if key_style['label'] == curr_section or key_style['label'] == curr_player:
+            update_key_image(deck, key, True)
+        else:
+            update_key_image(deck, key, False)
 
     # Register callback function for when a key state changes.
     deck.set_key_callback(key_change_callback)
