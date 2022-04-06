@@ -34,7 +34,12 @@ def render_key_image(deck, icon_filename, font_filename, label_text):
     # label onto the image a few pixels from the bottom of the key.
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(font_filename, 14)
-    draw.text((image.width / 2, image.height - 5), text=label_text, font=font, anchor="ms", fill="white")
+    # Si és una porta printem una mica més amunt per que quedi centrat
+    if label_text[0] == 'P':
+        draw.text((image.width / 2, image.height), text=label_text, font=font, anchor="ms", fill="white")
+
+    else:
+        draw.text((image.width / 2, image.height - 5), text=label_text, font=font, anchor="ms", fill="white")
 
     return PILHelper.to_native_format(deck, image)
 

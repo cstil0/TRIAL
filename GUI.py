@@ -32,7 +32,7 @@ def selectPlayer_window(dataframes, section_num):
             break
         if event_clean == 'player':
             player_name = players[int(player)]
-            Dataframes.updatePlayer(dataframes, player_name)
+            Dataframes.updatePlayer(dataframes, player_name, section_num)
             points_window(dataframes, player_name, section_num)
 
     window.close()

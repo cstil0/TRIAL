@@ -126,7 +126,14 @@ def render_key_image(deck, icon_filename, font_filename, label_text):
     # label onto the image a few pixels from the bottom of the key.
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(font_filename, 28)
-    draw.text((image.width / 2, image.height / 2 + 10), text=label_text, font=font, anchor="ms", fill="white", align='center', stroke_width=1, stroke_fill='black')
+    # Si és una porta printem una mica més amunt per que quedi centrat
+    # Mirem també que no sigui un string buit per què no peti
+    # POTSER ES POT TROBAR UNA MANERA MÉS MACA DE FER AQUEST IF
+    if label_text != '' and label_text[0] == 'P' and len(label_text) != 3:
+        draw.text((image.width / 2, image.height / 2 - 3), text=label_text, font=font, anchor="ms", fill="white", align='center', stroke_width=1, stroke_fill='black')
+
+    else:
+        draw.text((image.width / 2, image.height / 2 + 10), text=label_text, font=font, anchor="ms", fill="white", align='center', stroke_width=1, stroke_fill='black')
 
     return PILHelper.to_native_format(deck, image)
 
@@ -188,7 +195,9 @@ def key_change_callback(deck, key, state):
         style_name = key_style['name']
         if style_name == "player":
             player_abr = key_style['label']
-            Dataframes.updatePlayer(dataframes, players[player_abr])
+            name = players[player_abr]
+            section_num = curr_section[-1]
+            Dataframes.updatePlayer(dataframes, players[player_abr], section_num)
 
         elif style_name == "section":
             section_num = key_style['label'][-1]
@@ -198,7 +207,7 @@ def key_change_callback(deck, key, state):
         elif key_style['label'][0] == 'P':
             porta_num = style_name[0]
             porta_punts = style_name[1:]
-            Dataframes.updateData(dataframes, porta_punts, porta_num, curr_section[-1], curr_player)
+            Dataframes.updateData(dataframes, porta_punts, porta_num, curr_section[-1], players[curr_player])
 
         elif style_name == "exit":
             # Use a scoped-with on the deck to ensure we're the only thread
