@@ -11,7 +11,6 @@ if __name__ == '__main__':
 
     # -- Define variables --
     # Number of players
-    # CREC QUE ELS FINAL PLAYERS NO ELS NECESSITAREM PER QUÈ ÉS EL QUE CALCULA EL PROGRAMA I HO GUARDAREM A UN ALTRE LLOC
     qualifying_players_num, final_players_num = (8, 6)
     # Number of columns info players
     cols_num = 12

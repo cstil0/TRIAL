@@ -38,7 +38,7 @@ def get_key_style(deck, key, state):
     elif key == 5:
         name = "exit"
         icon = "{}.png".format("Exit")
-        label = ""
+        label = " "
 
     # Només creem els diferents diccionaris en el cas que estiguem en els punts corresponents (així no cal guardar també el color del botó
     elif key in ten_keys:
@@ -69,7 +69,7 @@ def get_key_style(deck, key, state):
     else:
         name = "empty"
         icon = "black.png"
-        label = ""
+        label = " "
 
     return {
         "name": name,
