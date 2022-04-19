@@ -23,6 +23,10 @@ class Dataframes:
         self.finalTitle2 = None
         self.hashtag = None
 
+        # Profiling
+        start = 0
+        end = 0
+
     # -- Create dataframes --
     def create_qualifyingPlayers(self, col_names, cols_num, row_num, qualifying_players_num):
         # Borrem tot el que hi ha abans i després del que ens interesa
@@ -195,7 +199,7 @@ class Dataframes:
         self.saveExcel()
 
     def updateData(self, point, porta_num, section_num, player_name):
-        curr_total = 0
+        section_total = 0
         # Primer busquem a quina fila està el nom del player seleccionat --> estarà al [0] de la llista que retorna la funció index
         row_index = self.puntsPortes.index[self.puntsPortes['NOM'] == player_name].tolist()[0]
 
@@ -208,34 +212,36 @@ class Dataframes:
 
         # Recorrem totes les portes de la secció i sumem els punts
         # Així és més fàcil si es canvia de 10 a 0 per exemple i coses així
-        for j in range (1, 7):
-            curr_point = self.puntsPortes.loc[row_index, 'P' + str(j) + '_S' + str(section_num)]
-            # Sumem només si és 10
+        for point_i in range (1, 7):
+            curr_point = self.puntsPortes.loc[row_index, 'P' + str(point_i) + '_S' + str(section_num)]
+            # Sumem només si és 10 (podria ser '-')
             if curr_point == 10:
-                curr_total += int(curr_point)
+                section_total += int(curr_point)
 
-        # Actualitzem quants punts 60-0 s'han fet per secció --> seria més fàcil anar comptant tots els punts de les portes de la secció però com que no es guarden quan canvies de player no me'n fio
-        # MENTIDA, SI QUE ES GUARDEN AL PUNTSPORTES!!
+        # Actualitzem quants punts 60-0 s'han fet per secció
+
         # Mirem el total de punts anterior de la secció per saber d'on hem de restar un punt a les columnes de punts 60-0 i així sumar-lo on toqui
         # Primer busquem a quina fila està el nom del player seleccionat --> estarà al [0] de la llista que retorna la funció index (que és diferent a la de les portes per què s'ordena)
         row_index = self.finalPlayers.index[self.finalPlayers['NOM'] == player_name].tolist()[0]
         # Busquem el total que hi ha en aquella secció per aquell player
-        # Numero de la secció
         last_total_section = self.finalPlayers.loc[row_index, 'SECCIÓ ' + section_num]
-        # Total de la secció
+        # Total general
         last_total = self.finalPlayers.loc[row_index, 'TOTAL']
 
-        # Necessitem saber quina diferència hi ha entre el total actual i l'anterior, i això serà el que sumarem
-        # Si és negatiu significa que s'han equivocat i han passat de 0 a 10 --> s'arregla sol per què com que està sumant, li resta 10 al total ja que l'added és negatiu
-        added_total = curr_total - last_total_section
-        curr_total_section = added_total + last_total_section
+        # Necessitem saber quina diferència hi ha entre el total actual i l'anterior, i això serà el que sumarem -- crec que és més eficient que fer un for i recorre-ho tot de nou
+        # Si és negatiu significa que s'han equivocat i han passat de 0 a 10 -->funciona per què com que està sumant, li resta 10 al total ja que l'added és negatiu
+        added_total = section_total - last_total_section
+        #curr_total_section = added_total + last_total_section
 
         # Ho sumem tant a la secció com al total general
-        self.finalPlayers.loc[row_index, 'SECCIÓ ' + section_num] = curr_total_section
+        #self.finalPlayers.loc[row_index, 'SECCIÓ ' + section_num] = curr_total_section
+        self.finalPlayers.loc[row_index, 'SECCIÓ ' + section_num] = section_total
         self.finalPlayers.loc[row_index, 'TOTAL'] = last_total + added_total
 
+
+        # Actualitzem els totals de la classificació 60-0 -- crec que és més eficient fer-ho així que recorre-ho tot i anar comptant
         # Convertim el total a float per què així es guarda el nom de la columna
-        self.finalPlayers.loc[row_index, float(curr_total)] = self.finalPlayers.loc[row_index, curr_total] + 1
+        self.finalPlayers.loc[row_index, float(section_total)] = self.finalPlayers.loc[row_index, section_total] + 1
         self.finalPlayers.loc[row_index, float(last_total_section)] = self.finalPlayers.loc[row_index, last_total_section] - 1
 
         self.sortPlayers()

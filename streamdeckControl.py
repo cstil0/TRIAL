@@ -16,6 +16,10 @@ players = None
 
 # Returns styling information for a key based on its position and state.
 def get_key_style(deck, key, state):
+    ten_keys = (16, 24, 19, 27, 6, 7)
+    zero_keys = (17, 20, 25, 28, 14, 15)
+    empty_keys = (18, 21, 26, 29, 22, 23)
+
     # Last button in the example application is the exit button.
     exit_key_index = deck.key_count() - 1
     font = "verdana-bold.ttf"
@@ -36,70 +40,31 @@ def get_key_style(deck, key, state):
         icon = "{}.png".format("Exit")
         label = ""
 
-    # ESTARIA GUAI FER-HO UNA MICA MÉS EFICIENT -- POTSER ES PODRIEN POSAR ELS VALORS A UN DICCIONARI I ANAR RECORRENT :)
-    elif key == 16 or key == 19 or key == 24 or key == 27 or key == 6 or key == 7:
+    # Només creem els diferents diccionaris en el cas que estiguem en els punts corresponents (així no cal guardar també el color del botó
+    elif key in ten_keys:
+        # Creem un diccionari per no haver de fer un if per cada tecla
+        stdeck_keys = {ten_keys[0]: ('110', 'P1\n+10'), ten_keys[1]: ('210', 'P2\n+10'), ten_keys[2]: ('310', 'P3\n+10'),
+                       ten_keys[3]: ('410', 'P4\n+10'), ten_keys[4]: ('510', 'P5\n+10'), ten_keys[5]: ('610', 'P6\n+10')}
+
         icon = "{}.png".format("green_door")
-        if key == 16:
-            name = "110"
-            label = "P1\n+10"
-        if key == 24:
-            name = "210"
-            label = "P2\n+10"
-        if key == 19:
-            name = "310"
-            label = "P3\n+10"
-        if key == 27:
-            name = "410"
-            label = "P4\n+10"
-        if key == 6:
-            name = "510"
-            label = "P5\n+10"
-        if key == 7:
-            name = "610"
-            label = "P6\n+10"
+        name = stdeck_keys[key][0]
+        label = stdeck_keys[key][1]
 
-    elif key == 17 or key == 20 or key == 25 or key == 28 or key == 14 or key == 15:
+    elif key in zero_keys:
+        stdeck_keys = {zero_keys[0]: ('10', 'P1\n+0'), zero_keys[1]: ('20', 'P2\n+0'), zero_keys[2]: ('30', 'P3\n+0'),
+                       zero_keys[3]: ('40', 'P4\n+0'), zero_keys[4]: ('50', 'P5\n+0'), zero_keys[5]: ('60', 'P6\n+0')}
+
         icon = "{}.png".format("red")
-        if key == 17:
-            name = "10"
-            label = "P1\n+0"
-        if key == 25:
-            name = "20"
-            label = "P2\n+0"
-        if key == 20:
-            name = "30"
-            label = "P3\n+0"
-        if key == 28:
-            name = "40"
-            label = "P4\n+0"
-        if key == 14:
-            name = "50"
-            label = "P5\n+0"
-        if key == 15:
-            name = "60"
-            label = "P6\n+0"
+        name = stdeck_keys[key][0]
+        label = stdeck_keys[key][1]
 
-    elif key == 18 or key == 21 or key == 26 or key == 29 or key == 22 or key == 23:
+    elif key in empty_keys:
+        stdeck_keys = {empty_keys[0]: ('110', 'P1\n+10'), empty_keys[1]: ('210', 'P2\n+10'), empty_keys[2]: ('310', 'P3\n+10'),
+                       empty_keys[3]: ('410', 'P4\n+10'), empty_keys[4]: ('510', 'P5\n+10'), empty_keys[5]: ('610', 'P6\n+10')}
+
         icon = "{}.png".format("yellow")
-        if key == 18:
-            name = "1-"
-            label = "P1\n-"
-        if key == 26:
-            name = "2-"
-            label = "P2\n-"
-        if key == 21:
-            name = "3-"
-            label = "P3\n-"
-        if key == 29:
-            name = "4-"
-            label = "P4\n-"
-        if key == 22:
-            name = "5-"
-            label = "P5\n-"
-        if key == 23:
-            name = "6-"
-            label = "P6\n-"
-
+        name = stdeck_keys[key][0]
+        label = stdeck_keys[key][1]
 
     else:
         name = "empty"
