@@ -99,8 +99,8 @@ class Dataframes:
         # Eliminem la columna que s'afegeix al principi al guardar l'excel
         if 'Unnamed: 0.1' in self.dataRaw:
             del self.dataRaw['Unnamed: 0.1']
-        if 'Unnamed: 0.1' in self.vmixRaw:
-            del self.vmixRaw['Unnamed: 0.1']
+        if 'Unnamed: 0' in self.vmixRaw:
+            del self.vmixRaw['Unnamed: 0']
         if 'Unnamed: 0.1' in self.trialRaw:
             del self.trialRaw['Unnamed: 0.1']
         if 'Unnamed: 0.1' in self.playerRaw:
