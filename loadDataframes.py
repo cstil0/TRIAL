@@ -96,6 +96,15 @@ class Dataframes:
 
     def createDataframes(self, qualifying_players_num, final_players_num, cols_num, row_num):
         self.loadExcel()
+        # Eliminem la columna que s'afegeix al principi al guardar l'excel
+        if 'Unnamed: 0.1' in self.dataRaw:
+            del self.dataRaw['Unnamed: 0.1']
+        if 'Unnamed: 0.1' in self.vmixRaw:
+            del self.vmixRaw['Unnamed: 0.1']
+        if 'Unnamed: 0.1' in self.trialRaw:
+            del self.trialRaw['Unnamed: 0.1']
+        if 'Unnamed: 0.1' in self.playerRaw:
+            del self.playerRaw['Unnamed: 0.1']
 
         col_names_qual = self.getColNames(cols_num, row_num)
 
@@ -133,7 +142,6 @@ class Dataframes:
             self.dataRaw.to_excel(writer, sheet_name='DADES')
             self.trialRaw.to_excel(writer, sheet_name='TRIAL')
             self.playerRaw.to_excel(writer, sheet_name='PLAYER1')
-
 
     def exportDataframe(self, section_num, player_name):
         # Agafem l'index del player sabent que estan ordenats al row_num (ho necessitem per saber exactament la posició del player i saber on guardar-lo al excel final)

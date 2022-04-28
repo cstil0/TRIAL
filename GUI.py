@@ -42,12 +42,12 @@ def points_window(dataframes, player_name, section_num):
     window_name = 'Secció ' + section_num + '- ' + player_name
     layout = [
         [sg.Text(window_name, font=('Calibri', 17))],
-        [sg.Text('Porta 1: ', font=('Calibri', 20)), sg.Button('0', key='zero1', font=('Calibri', 20), size=(10,3)), sg.Button('10', key='ten1', font=('Calibri', 20), size=(10,3)), sg.Button('-', key='empty1', font=('Calibri', 20), size=(10,3))],
-        [sg.Text('Porta 2: ', font=('Calibri', 20)), sg.Button('0', key='zero2', font=('Calibri', 20), size=(10,3)), sg.Button('10', key='ten2', font=('Calibri', 20), size=(10,3)), sg.Button('-', key='empty2', font=('Calibri', 20), size=(10,3))],
-        [sg.Text('Porta 3: ', font=('Calibri', 20)), sg.Button('0', key='zero3', font=('Calibri', 20), size=(10,3)), sg.Button('10', key='ten3', font=('Calibri', 20), size=(10,3)), sg.Button('-', key='empty3', font=('Calibri', 20), size=(10,3))],
-        [sg.Text('Porta 4: ', font=('Calibri', 20)), sg.Button('0', key='zero4', font=('Calibri', 20), size=(10,3)), sg.Button('10', key='ten4', font=('Calibri', 20), size=(10,3)), sg.Button('-', key='empty4', font=('Calibri', 20), size=(10,3))],
-        [sg.Text('Porta 5: ', font=('Calibri', 20)), sg.Button('0', key='zero5', font=('Calibri', 20), size=(10,3)), sg.Button('10', key='ten5', font=('Calibri', 20), size=(10,3)), sg.Button('-', key='empty5', font=('Calibri', 20), size=(10,3))],
-        [sg.Text('Porta 6: ', font=('Calibri', 20)), sg.Button('0', key='zero6', font=('Calibri', 20), size=(10,3)), sg.Button('10', key='ten6', font=('Calibri', 20), size=(10,3)), sg.Button('-', key='empty6', font=('Calibri', 20), size=(10,3))]
+        [sg.Text('Porta 1: ', font=('Calibri', 20)), sg.Button('0', key='zero1', font=('Calibri', 20), size=(10,3), button_color = '#36914d'), sg.Button('10', key='ten1', font=('Calibri', 20), size=(10,3), button_color = '#e44949'), sg.Button('-', key='empty1', font=('Calibri', 20), size=(10,3), button_color = '#d1bd57')],
+        [sg.Text('Porta 2: ', font=('Calibri', 20)), sg.Button('0', key='zero2', font=('Calibri', 20), size=(10,3), button_color = '#36914d'), sg.Button('10', key='ten2', font=('Calibri', 20), size=(10,3), button_color = '#e44949'), sg.Button('-', key='empty2', font=('Calibri', 20), size=(10,3), button_color = '#d1bd57')],
+        [sg.Text('Porta 3: ', font=('Calibri', 20)), sg.Button('0', key='zero3', font=('Calibri', 20), size=(10,3), button_color = '#36914d'), sg.Button('10', key='ten3', font=('Calibri', 20), size=(10,3), button_color = '#e44949'), sg.Button('-', key='empty3', font=('Calibri', 20), size=(10,3), button_color = '#d1bd57')],
+        [sg.Text('Porta 4: ', font=('Calibri', 20)), sg.Button('0', key='zero4', font=('Calibri', 20), size=(10,3), button_color = '#36914d'), sg.Button('10', key='ten4', font=('Calibri', 20), size=(10,3), button_color = '#e44949'), sg.Button('-', key='empty4', font=('Calibri', 20), size=(10,3), button_color = '#d1bd57')],
+        [sg.Text('Porta 5: ', font=('Calibri', 20)), sg.Button('0', key='zero5', font=('Calibri', 20), size=(10,3), button_color = '#36914d'), sg.Button('10', key='ten5', font=('Calibri', 20), size=(10,3), button_color = '#e44949'), sg.Button('-', key='empty5', font=('Calibri', 20), size=(10,3), button_color = '#d1bd57')],
+        [sg.Text('Porta 6: ', font=('Calibri', 20)), sg.Button('0', key='zero6', font=('Calibri', 20), size=(10,3), button_color = '#36914d'), sg.Button('10', key='ten6', font=('Calibri', 20), size=(10,3), button_color = '#e44949'), sg.Button('-', key='empty6', font=('Calibri', 20), size=(10,3), button_color = '#d1bd57')]
 
         #[sg.Button('Actualitzar', key = 'update', font=('Calibri', 15))]
     ]
