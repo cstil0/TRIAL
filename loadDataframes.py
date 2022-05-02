@@ -90,11 +90,11 @@ class Dataframes:
         print(self.puntsPortes)
 
     # -- Load excel --
-    def getColNames(self, cols_num, row_num):
+    def getColNames(self, dataset, cols_num, row_num):
         col_names = []
         # Iterate the columns knowing that name is at row_num
         for i in range (cols_num):
-            col_names.append(self.trialRaw.iloc[row_num, i])
+            col_names.append(dataset.iloc[row_num, i])
 
         return col_names
 
@@ -119,12 +119,12 @@ class Dataframes:
         if 'Unnamed: 0.1' in self.playerRaw:
             del self.playerRaw['Unnamed: 0.1']
 
-        col_names_qual = self.getColNames(cols_num, row_num)
+        col_names_qual = self.getColNames(self.trialRaw, cols_num, row_num)
 
         self.create_qualifyingPlayers(col_names_qual, cols_num, row_num, qualifying_players_num)
         # Sumem set al número de columnes per què ara volem agafar també els possibles punts (0-60)
         self.firstRow_finalPlayers = 2*row_num + qualifying_players_num + 3
-        col_names_final = self.getColNames(cols_num + 7, self.firstRow_finalPlayers)
+        col_names_final = self.getColNames(self.trialRaw, cols_num + 7, self.firstRow_finalPlayers)
         self.create_finalPlayers(col_names_final, cols_num + 7, self.firstRow_finalPlayers)
         print(self.finalPlayers)
 
@@ -193,30 +193,12 @@ class Dataframes:
         print(self.puntsPortes)
 
     def exportTRIALDataframe(self):
+        # Guardem tots els punts per secció a l'excel TRIAL per visualitzar-ho millor
         player_i = 1
-        curr_row = self.firstRow_finalPlayers + 1
+        row_cols = self.finalPlayers.columns
         for index, row in self.finalPlayers.iterrows():
-            self.trialRaw.loc[curr_row, 'Unnamed: 0'] = row['SORTIDA']
-            self.trialRaw.loc[curr_row, 'Unnamed: 1'] = row['NUMERO']
-            self.trialRaw.loc[curr_row, 'Unnamed: 2'] = row['NOM']
-            self.trialRaw.loc[curr_row, 'Unnamed: 3'] = row['ABR']
-            self.trialRaw.loc[curr_row, 'Unnamed: 4'] = row['PAIS']
-            self.trialRaw.loc[curr_row, 'Unnamed: 5'] = row['BANDERA']
-            self.trialRaw.loc[curr_row, 'Unnamed: 6'] = row['SECCIÓ 1']
-            self.trialRaw.loc[curr_row, 'Unnamed: 7'] = row['SECCIÓ 2']
-            self.trialRaw.loc[curr_row, 'Unnamed: 8'] = row['SECCIÓ 3']
-            self.trialRaw.loc[curr_row, 'Unnamed: 9'] = row['SECCIÓ 4']
-            self.trialRaw.loc[curr_row, 'Unnamed: 10'] = row['SECCIÓ 5']
-            self.trialRaw.loc[curr_row, 'Unnamed: 11'] = row['TOTAL']
-            self.trialRaw.loc[curr_row, 'Unnamed: 12'] = row[60.0]
-            self.trialRaw.loc[curr_row, 'Unnamed: 13'] = row[50]
-            self.trialRaw.loc[curr_row, 'Unnamed: 14'] = row[40.0]
-            self.trialRaw.loc[curr_row, 'Unnamed: 15'] = row[30.0]
-            self.trialRaw.loc[curr_row, 'Unnamed: 16'] = row[20.0]
-            self.trialRaw.loc[curr_row, 'Unnamed: 17'] = row[10.0]
-            self.trialRaw.loc[curr_row, 'Unnamed: 18'] = row[0.0]
-
-            curr_row += 1
+            for col_i in range (len(row_cols)):
+                self.trialRaw.loc[index, 'Unnamed: ' + str(col_i)] = row[row_cols[col_i]]
 
     def exportDataframe(self, section_num, player_name):
         # Actualitzem tant l'excel que llegeix l'VMIX com "llegible"
