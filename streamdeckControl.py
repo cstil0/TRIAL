@@ -17,8 +17,8 @@ players = None
 # Returns styling information for a key based on its position and state.
 def get_key_style(deck, key, state):
     ten_keys = (16, 24, 19, 27, 6, 7)
-    zero_keys = (17, 20, 25, 28, 14, 15)
-    empty_keys = (18, 21, 26, 29, 22, 23)
+    zero_keys = (17, 25, 20, 28, 14, 15)
+    empty_keys = (18, 26, 21, 29, 22, 23)
 
     # Last button in the example application is the exit button.
     exit_key_index = deck.key_count() - 1
@@ -59,8 +59,8 @@ def get_key_style(deck, key, state):
         label = stdeck_keys[key][1]
 
     elif key in empty_keys:
-        stdeck_keys = {empty_keys[0]: ('110', 'P1\n+10'), empty_keys[1]: ('210', 'P2\n+10'), empty_keys[2]: ('310', 'P3\n+10'),
-                       empty_keys[3]: ('410', 'P4\n+10'), empty_keys[4]: ('510', 'P5\n+10'), empty_keys[5]: ('610', 'P6\n+10')}
+        stdeck_keys = {empty_keys[0]: ('110', 'P1\n-'), empty_keys[1]: ('210', 'P2\n-'), empty_keys[2]: ('310', 'P3\n-'),
+                       empty_keys[3]: ('410', 'P4\n-'), empty_keys[4]: ('510', 'P5\n-'), empty_keys[5]: ('610', 'P6\n-')}
 
         icon = "{}.png".format("yellow")
         name = stdeck_keys[key][0]
@@ -214,7 +214,10 @@ def initiate_streamdeck(data):
     print("Found {} Stream Deck(s).\n".format(len(streamdecks)))
 
     for index, deck in enumerate(streamdecks):
-        deck.open()
+        if index == 1:
+            # Afafem només la primera streamdeck
+            deck.open()
+
     deck.reset()
 
     print("Opened '{}' device (serial number: '{}')".format(deck.deck_type(), deck.get_serial_number()))

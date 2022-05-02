@@ -19,7 +19,7 @@ if __name__ == '__main__':
     dataframes = Dataframes.createDataframes(dataframes, qualifying_players_num, final_players_num, cols_num, row_num)
 
     # Initialize streamdeck
-#    streamdeckControl.initiate_streamdeck(dataframes)
+    streamdeckControl.initiate_streamdeck(dataframes)
 
     # Open window GUI
     GUI.selectSection_window(dataframes)
