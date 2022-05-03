@@ -59,8 +59,8 @@ def get_key_style(deck, key, state):
         label = stdeck_keys[key][1]
 
     elif key in empty_keys:
-        stdeck_keys = {empty_keys[0]: ('110', 'P1\n-'), empty_keys[1]: ('210', 'P2\n-'), empty_keys[2]: ('310', 'P3\n-'),
-                       empty_keys[3]: ('410', 'P4\n-'), empty_keys[4]: ('510', 'P5\n-'), empty_keys[5]: ('610', 'P6\n-')}
+        stdeck_keys = {empty_keys[0]: ('1-', 'P1\n-'), empty_keys[1]: ('2-', 'P2\n-'), empty_keys[2]: ('3-', 'P3\n-'),
+                       empty_keys[3]: ('4-', 'P4\n-'), empty_keys[4]: ('5-', 'P5\n-'), empty_keys[5]: ('6-', 'P6\n-')}
 
         icon = "{}.png".format("yellow")
         name = stdeck_keys[key][0]
@@ -206,7 +206,7 @@ def initiate_streamdeck(data):
     # Trobem l'abreviació del current player -- és més fàcil treballar amb el que es mostra i canviar-ho al que toca quan enviem a dataframes
     curr_player = get_key(curr_player_name)
     # Agafem la secció tal com està guardada
-    curr_section_name = dataframes.vmixRaw.loc[0, 'SECCIO']
+    curr_section_name = dataframes.vmixRaw.loc[0, 'C_SECTION']
     curr_section = 'SEC {}'.format(curr_section_name[-1])
 
     streamdecks = DeviceManager().enumerate()
@@ -214,7 +214,7 @@ def initiate_streamdeck(data):
     print("Found {} Stream Deck(s).\n".format(len(streamdecks)))
 
     for index, deck in enumerate(streamdecks):
-        if index == 1:
+        if index == 0:
             # Afafem només la primera streamdeck
             deck.open()
 

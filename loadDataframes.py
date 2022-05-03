@@ -45,6 +45,7 @@ class Dataframes:
     def create_finalPlayers(self, col_names, cols_num, row_num):
         # Borrem tot el que hi ha abans del que ens interesa
         df_data_clean = self.trialRaw.drop(self.trialRaw.index[:row_num + 1])
+        print('Data Clean:\n')
         print(df_data_clean)
 
         # Agafem les columnes necessaries
@@ -87,6 +88,7 @@ class Dataframes:
                     curr_row = player_i + self.firstRow_finalPlayers + 1
                     self.puntsPortes.loc[curr_row, 'P' + str(porta) + '_S' + str(section)] = fill
 
+        print('Punts Portes:\n')
         print(self.puntsPortes)
 
     # -- Load excel --
@@ -105,6 +107,7 @@ class Dataframes:
         self.trialRaw = pd.read_excel(xls_file, 'TRIAL')
         self.playerRaw = pd.read_excel(xls_file, 'PLAYER1')
 
+        print('Trial Raw:\n')
         print(self.trialRaw)
 
     def createDataframes(self, qualifying_players_num, final_players_num, cols_num, row_num):
@@ -126,9 +129,13 @@ class Dataframes:
         self.firstRow_finalPlayers = 2*row_num + qualifying_players_num + 3
         col_names_final = self.getColNames(self.trialRaw, cols_num + 7, self.firstRow_finalPlayers)
         self.create_finalPlayers(col_names_final, cols_num + 7, self.firstRow_finalPlayers)
+        print('Final Players:\n')
         print(self.finalPlayers)
 
         self.create_PuntsPortes()
+
+        # Ordenem per si s'ha carregat l'excel amb dades
+        self.sortPlayers()
 
         # Això realment no és necessari ja que ho guarda l'excel original al lloc que toca
         # Per tant no s'exporta cada cop que es fa un save però ho guardo per si de cas
@@ -143,9 +150,10 @@ class Dataframes:
     # -- Export dataframes --
     def sortPlayers(self):
         # Ordenem en aquest ordre en el cas que hi hagi empats
-        self.finalPlayers = self.finalPlayers.sort_values(by=[60.0,50, 40.0, 30.0, 20.0, 10.0, 'SORTIDA'], ascending=[False, False, False, False, False, False, True])
+        self.finalPlayers = self.finalPlayers.sort_values(by=['TOTAL', 60.0,50, 40.0, 30.0, 20.0, 10.0, 'SORTIDA'], ascending=[False, False, False, False, False, False, False, True])
         # Resetejem index per què comenci a 0 a la columna row_num que és la que guarda aquest nou index
         self.finalPlayers['row_num'] = self.finalPlayers.reset_index().index
+        print('Final Players:\n')
         print(self.finalPlayers)
 
     def saveExcel(self):
@@ -165,6 +173,8 @@ class Dataframes:
         self.vmixRaw.loc[0, 'C_BANDERA'] = self.finalPlayers.iloc[player_i]['BANDERA']
         self.vmixRaw.loc[0, 'C_PAIS'] = self.finalPlayers.iloc[player_i]['PAIS']
         self.vmixRaw.loc[0, 'C_PLAYER'] = self.finalPlayers.iloc[player_i]['NOM']
+        self.vmixRaw.loc[0, 'C_NUMERO'] = self.finalPlayers.iloc[player_i]['NUMERO']
+        self.vmixRaw.loc[0, 'C_POSICIÓ'] = self.finalPlayers.iloc[player_i]['row_num'] + 1
         self.vmixRaw.loc[0, 'C_PUNTS_SECCIO'] = self.finalPlayers.iloc[player_i]['SECCIÓ ' + str(section_num)]
 
         # El resum de resultats es mostra per tots els jugadors per tant ho recorrem tot per si ha canviat l'ordre
@@ -190,6 +200,8 @@ class Dataframes:
         player_i = self.puntsPortes.index[self.puntsPortes['NOM'] == player_name].tolist()[0]
         for porta in range(1, 7):
             self.vmixRaw.loc[0, 'C_PUNTS_P' + str(porta)] = self.puntsPortes.loc[player_i, 'P' + str(porta) + '_S' + str(section_num)]
+
+        print('Punts Portes:\n')
         print(self.puntsPortes)
 
     def exportTRIALDataframe(self):
@@ -208,7 +220,7 @@ class Dataframes:
     # -- Update selections --
     def updateSection(self, section_num, player_name=None):
         # Actualitzem només la cel·la que es mostra amb la info del player
-        self.vmixRaw.loc[0, 'SECCIO'] = 'SECTION ' + str(section_num)
+        self.vmixRaw.loc[0, 'C_SECTION'] = 'SECTION ' + str(section_num)
         self.saveExcel()
 
     def updatePlayer(self, player_name, section_num):
@@ -216,16 +228,18 @@ class Dataframes:
         row_index = self.finalPlayers.index[self.finalPlayers['NOM'] == player_name].tolist()[0]
 
         # Update
+        self.vmixRaw.loc[0, 'C_SECTION'] = 'SECTION ' + str(section_num)
         self.vmixRaw.loc[0, 'C_PAIS'] = self.finalPlayers.loc[row_index]['PAIS']
         self.vmixRaw.loc[0, 'C_PLAYER'] = player_name
         self.vmixRaw.loc[0, 'C_BANDERA'] = self.finalPlayers.loc[row_index]['BANDERA']
+        self.vmixRaw.loc[0, 'C_NUMERO'] = self.finalPlayers.loc[row_index]['NUMERO']
+        self.vmixRaw.loc[0, 'C_POSICIÓ'] = self.finalPlayers.loc[row_index]['row_num'] + 1
 
         # Recorrem les portes del player per tal que es netegi el marcador petit
         # Tornem a agafar l'index per què el punts portes no està ordenat
         row_index_porta = self.puntsPortes.index[self.puntsPortes['NOM'] == player_name].tolist()[0]
         for porta in range(1, 7):
             self.vmixRaw.loc[0, 'C_PUNTS_P' + str(porta)] = self.puntsPortes.loc[row_index_porta]['P' + str(porta) + '_S' + str(section_num)]
-            print(self.vmixRaw.loc[0, 'C_PUNTS_P' + str(porta)])
 
         # Actualitzem també els punts de la secció que es mostren al marcador petit
         self.vmixRaw.loc[0, 'C_PUNTS_SECCIO'] = self.finalPlayers.loc[row_index]['SECCIÓ ' + str(section_num)]
