@@ -13,63 +13,88 @@ curr_player = None
 curr_section = None
 dataframes = None
 players = None
+points = []
+
+# boolan per saber si estem dins la carpeta de punts
+is_points = False
 
 # Returns styling information for a key based on its position and state.
 def get_key_style(deck, key, state):
-    ten_keys = (16, 24, 19, 27, 6, 7)
-    zero_keys = (17, 25, 20, 28, 14, 15)
-    empty_keys = (18, 26, 21, 29, 22, 23)
-
-    # Last button in the example application is the exit button.
-    exit_key_index = deck.key_count() - 1
     font = "verdana-bold.ttf"
+    global is_points
+    if is_points:
+        # print points folder
+        door_keys = (2 ,3, 4, 5, 6, 7)
+        ten_keys = (10, 11, 12, 13, 14, 15)
+        zero_keys = (18, 19, 20, 21, 22, 23)
+        empty_keys = (26, 27, 28, 29, 30, 31)
+        # Només creem els diferents diccionaris en el cas que estiguem en els punts corresponents (així no cal guardar també el color del botó)
+        if key in ten_keys:
+            # Creem un diccionari per no haver de fer un if per cada tecla
+            stdeck_keys = {ten_keys[0]: ('110', 'P1\n+10'), ten_keys[1]: ('210', 'P2\n+10'),
+                           ten_keys[2]: ('310', 'P3\n+10'),
+                           ten_keys[3]: ('410', 'P4\n+10'), ten_keys[4]: ('510', 'P5\n+10'),
+                           ten_keys[5]: ('610', 'P6\n+10')}
 
-    if key >= 0 and key <= 4:
-        name = "section"
-        icon = "{}.png".format("green") if state else "{}.png".format("purple")
-        label = "SEC {}".format(key + 1)
+            icon = "{}.png".format("active_door") if state else "{}.png".format("green_door")
+            name = stdeck_keys[key][0]
+            label = stdeck_keys[key][1]
 
-    elif key >= 8 and key <= 13:
-        name = "player"
-        icon = "{}.png".format("green") if state else "{}.png".format("blue")
-        abreviations = list(players.keys())
-        label = "{}".format(abreviations[key-8])
+        elif key in zero_keys:
+            stdeck_keys = {zero_keys[0]: ('10', 'P1\n+0'), zero_keys[1]: ('20', 'P2\n+0'), zero_keys[2]: ('30', 'P3\n+0'),
+                           zero_keys[3]: ('40', 'P4\n+0'), zero_keys[4]: ('50', 'P5\n+0'), zero_keys[5]: ('60', 'P6\n+0')}
 
-    elif key == 5:
-        name = "exit"
-        icon = "{}.png".format("Exit")
-        label = " "
+            icon = "{}.png".format("active_door") if state else "{}.png".format("red")
+            name = stdeck_keys[key][0]
+            label = stdeck_keys[key][1]
 
-    # Només creem els diferents diccionaris en el cas que estiguem en els punts corresponents (així no cal guardar també el color del botó
-    elif key in ten_keys:
-        # Creem un diccionari per no haver de fer un if per cada tecla
-        stdeck_keys = {ten_keys[0]: ('110', 'P1\n+10'), ten_keys[1]: ('210', 'P2\n+10'), ten_keys[2]: ('310', 'P3\n+10'),
-                       ten_keys[3]: ('410', 'P4\n+10'), ten_keys[4]: ('510', 'P5\n+10'), ten_keys[5]: ('610', 'P6\n+10')}
+        elif key in empty_keys:
+            stdeck_keys = {empty_keys[0]: ('1-', 'P1\n-'), empty_keys[1]: ('2-', 'P2\n-'), empty_keys[2]: ('3-', 'P3\n-'),
+                           empty_keys[3]: ('4-', 'P4\n-'), empty_keys[4]: ('5-', 'P5\n-'), empty_keys[5]: ('6-', 'P6\n-')}
 
-        icon = "{}.png".format("green_door")
-        name = stdeck_keys[key][0]
-        label = stdeck_keys[key][1]
+            icon = "{}.png".format("active_door") if state else "{}.png".format("yellow")
+            name = stdeck_keys[key][0]
+            label = stdeck_keys[key][1]
 
-    elif key in zero_keys:
-        stdeck_keys = {zero_keys[0]: ('10', 'P1\n+0'), zero_keys[1]: ('20', 'P2\n+0'), zero_keys[2]: ('30', 'P3\n+0'),
-                       zero_keys[3]: ('40', 'P4\n+0'), zero_keys[4]: ('50', 'P5\n+0'), zero_keys[5]: ('60', 'P6\n+0')}
+        elif key in door_keys:
+            door_num = door_keys.index(key) + 1
+            name = "empty_door{}".format(door_num)
+            icon = "{}.png".format("active_door") if state else "{}.png".format("black")
+            label = " "
 
-        icon = "{}.png".format("red")
-        name = stdeck_keys[key][0]
-        label = stdeck_keys[key][1]
+        elif key == 0:
+            name = "main_app"
+            icon = "{}.png".format("up_arrow")
+            label = " "
 
-    elif key in empty_keys:
-        stdeck_keys = {empty_keys[0]: ('1-', 'P1\n-'), empty_keys[1]: ('2-', 'P2\n-'), empty_keys[2]: ('3-', 'P3\n-'),
-                       empty_keys[3]: ('4-', 'P4\n-'), empty_keys[4]: ('5-', 'P5\n-'), empty_keys[5]: ('6-', 'P6\n-')}
+        else:
+            name = "empty"
+            icon = "black.png"
+            label = " "
 
-        icon = "{}.png".format("yellow")
-        name = stdeck_keys[key][0]
-        label = stdeck_keys[key][1]
-
+    # print main application
     else:
-        name = "empty"
-        icon = "black.png"
-        label = " "
+        if key >= 0 and key <= 4:
+            name = "section"
+            icon = "{}.png".format("green") if state else "{}.png".format("purple")
+            label = "SEC {}".format(key + 1)
+
+        elif key >= 8 and key <= 13:
+            name = "player"
+            icon = "{}.png".format("green") if state else "{}.png".format("blue")
+            abreviations = list(players.keys())
+            label = "{}".format(abreviations[key-8])
+
+        elif key == 16:
+            name = "points_folder"
+            icon = "{}.png".format("folder_icon")
+            label = " "
+
+        else:
+            name = "empty"
+            icon = "black.png"
+            label = " "
+
 
     return {
         "name": name,
@@ -140,7 +165,7 @@ def key_change_callback(deck, key, state):
             curr_key_style = get_key_style(deck, curr_key, state)
             if curr_key_style['name'] == key_style['name']:
                 # Cridem les variables globals per poder-les modificar
-                global curr_section, curr_player
+                global curr_section, curr_player, is_points, points
                 # Mirem si estem en un player i si aquest coincideix amb el current
                 if curr_key_style['label'] == curr_player:
                     # Actualitzem colors
@@ -158,43 +183,122 @@ def key_change_callback(deck, key, state):
 
         # Definim comportament
         style_name = key_style['name']
-        if style_name == "player":
+        style_label = key_style['label']
+        if (not is_points) and style_name == "player":
             player_abr = key_style['label']
             name = players[player_abr]
             section_num = curr_section[-1]
             Dataframes.updatePlayer(dataframes, players[player_abr], section_num)
 
-        elif style_name == "section":
+        elif (not is_points) and style_name == "section":
             section_num = key_style['label'][-1]
             Dataframes.updateSection(dataframes, section_num)
 
         # Comprovem si es tracta d'alguna porta
-        elif key_style['label'][0] == 'P':
+        elif is_points and style_label[0] == 'P':
             porta_num = style_name[0]
             porta_punts = style_name[1:]
             Dataframes.updateData(dataframes, porta_punts, porta_num, curr_section[-1], players[curr_player])
+            # Actualitzem els punts
+            porta_i = int(porta_num) - 1
+            points[porta_i] = porta_punts
+            render_screen(deck, porta_num, porta_punts)
+            """
+            # Mirem totes les keys de la streamdeck i les desactivem i activem segons calgui
+            # POTSER ES POT FER SENSE EL FOR SABENT EL NAME DE LA KEY -- NONO CREC QUE NO PER QUE NECESSITEM EL NUMERO...
+            for key in range(deck.key_count()):
+                # si la key pertany a la current porta
+                key_style = get_key_style(deck, key, state)
+                if key_style['label'][:2] == 'P' + porta_num:
+                    porta_num = key_style['name'][0]
+                    porta_punts = key_style['name'][1:]
+                    # tecla actual -- activem
+                    if porta_punts != '-':
+                        if porta_punts == points[porta_i]:
+                            update_key_image(deck, key, True)
 
-        elif style_name == "exit":
-            # Use a scoped-with on the deck to ensure we're the only thread
-            # using it right now.
-            with deck:
-                # Reset deck, clearing all button images.
-                deck.reset()
+                        # una altra tecla de la porta -- desactivem
+                        else:
+                            update_key_image(deck, key, False)
+                    else:
+                        if porta_punts != points[porta_i]:
+                            update_key_image(deck, key, False)
 
-                # Close deck handle, terminating internal worker threads.
-                deck.close()
+                #Activem també els botons generals
+                elif key_style['name'][-1] == porta_num:
+                    if porta_punts != '-':
+                        update_key_image(deck, key, True)
+                    else:
+                        update_key_image(deck, key, False)
+                        """
+
+        # print points screen
+        elif (not is_points) and style_name == 'points_folder':
+            # entrem a la carpeta de punts
+            is_points = True
+            render_screen(deck)
+
+        # print main app
+        elif is_points and style_name == 'main_app':
+            is_points = False
+            render_screen(deck)
+
+def render_screen(deck, curr_porta = None, curr_point = None):
+    global is_points
+    if not is_points:
+        for key in range(deck.key_count()):
+            key_style = get_key_style(deck, key, False)
+            # Posem en verd els que coincideixen amb el current
+            if key_style['label'] == curr_section or key_style['label'] == curr_player:
+                update_key_image(deck, key, True)
+            else:
+                update_key_image(deck, key, False)
+
+    elif curr_porta and curr_point:
+        porta_i = int(curr_porta) - 1
+
+        for key in range(deck.key_count()):
+            key_style = get_key_style(deck, key, False)
+            # si la key pertany a la current porta
+            if key_style['label'][:2] == 'P' + curr_porta:
+                key_point = key_style['name'][1:]
+                if curr_point != '-':
+                    # Si els punts de la tecla son els mateixos que el current -- activem
+                    if key_point == curr_point:
+                        update_key_image(deck, key, True)
+                    # una altra tecla de la porta -- desactivem
+                    else:
+                        update_key_image(deck, key, False)
+
+                else:
+                    if curr_point == points[porta_i]:
+                        update_key_image(deck, key, False)
+
+
+
+            # Activem també els botons generals
+            elif key_style['name'][-1] == curr_porta:
+                if curr_point == '-':
+                    update_key_image(deck, key, False)
+                else:
+                    update_key_image(deck, key, True)
+
+    else:
+        for key in range(deck.key_count()):
+            key_style = get_key_style(deck, key, False)
+            update_key_image(deck, key, False)
+
 
 # Per trobar la key del diccionari donat el valor
 def get_key(val):
     for key, value in players.items():
         if val == value:
             return key
-
     return
 
 def initiate_streamdeck(data):
     # Creem variables globals per què no podem passar-ho per paràmetre al key_change_callback
-    global dataframes, players, curr_player, curr_section
+    global dataframes, players, curr_player, curr_section, points
     dataframes = data
     abreviations = dataframes.puntsPortes['ABR'].values.tolist()
     names = dataframes.puntsPortes['NOM'].values.tolist()
@@ -209,12 +313,16 @@ def initiate_streamdeck(data):
     curr_section_name = dataframes.vmixRaw.loc[0, 'C_SECTION']
     curr_section = 'SEC {}'.format(curr_section_name[-1])
 
+    # agafem la llista de punts per portes
+    for i in range(1, 7):
+        points.append(dataframes.vmixRaw.loc[0, 'C_PUNTS_P' + str(i)])
+
     streamdecks = DeviceManager().enumerate()
 
     print("Found {} Stream Deck(s).\n".format(len(streamdecks)))
 
     for index, deck in enumerate(streamdecks):
-        if index == 0:
+        if index == 1:
             # Afafem només la primera streamdeck
             deck.open()
 
@@ -226,13 +334,7 @@ def initiate_streamdeck(data):
     deck.set_brightness(100)
 
     # Set initial key images.
-    for key in range(deck.key_count()):
-        key_style = get_key_style(deck, key, False)
-        # Posem en verd els que coincideixen amb el current
-        if key_style['label'] == curr_section or key_style['label'] == curr_player:
-            update_key_image(deck, key, True)
-        else:
-            update_key_image(deck, key, False)
+    render_screen(deck)
 
     # Register callback function for when a key state changes.
     deck.set_key_callback(key_change_callback)

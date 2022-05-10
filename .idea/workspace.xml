@@ -118,14 +118,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Test_StreamDeck.py</url>
-          <line>38</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/loadDataframes.py</url>
-          <line>152</line>
-          <option name="timeStamp" value="13" />
+          <url>file://$PROJECT_DIR$/streamdeckControl.py</url>
+          <line>285</line>
+          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
