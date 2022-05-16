@@ -236,6 +236,10 @@ def key_change_callback(deck, key, state):
         elif (not is_points) and style_name == 'points_folder':
             # entrem a la carpeta de punts
             is_points = True
+            # actualitzem la llista de punts per portes
+            for i in range(1, 7):
+                points[i-1] = dataframes.vmixRaw.loc[0, 'C_PUNTS_P' + str(i)]
+
             render_screen(deck)
 
         # print main app
@@ -245,6 +249,7 @@ def key_change_callback(deck, key, state):
 
 def render_screen(deck, curr_porta = None, curr_point = None):
     global is_points
+    global points
     if not is_points:
         for key in range(deck.key_count()):
             key_style = get_key_style(deck, key, False)
@@ -274,8 +279,6 @@ def render_screen(deck, curr_porta = None, curr_point = None):
                     if curr_point == points[porta_i]:
                         update_key_image(deck, key, False)
 
-
-
             # Activem també els botons generals
             elif key_style['name'][-1] == curr_porta:
                 if curr_point == '-':
@@ -283,10 +286,33 @@ def render_screen(deck, curr_porta = None, curr_point = None):
                 else:
                     update_key_image(deck, key, True)
 
+    # si estem a l'estat inicial dels punts, volem llegir el que hi ha guardat per printar-ho com toca
     else:
+        # primer netejem tota la pantalla
         for key in range(deck.key_count()):
             key_style = get_key_style(deck, key, False)
             update_key_image(deck, key, False)
+
+        # Recorrem els punts i pintem de color groc els que coincideixin
+        # comencem a la porta 3 per què correspon a la key 3 de la streamdeck
+        key_count = 2
+        for point in points:
+            # si el punt és diferent de empty printem de groc
+            if point != '-':
+                key = key_count
+                update_key_image(deck, key, True)
+                # comprovem quin punt és per posar-li també el color groc
+                if point == 0:
+                    # cada fila té 8 keys
+                    key = key_count + 8*2
+                    update_key_image(deck, key, True)
+
+                elif point == 10:
+                    key = key_count + 8
+                    update_key_image(deck, key, True)
+
+            key_count += 1
+
 
 
 # Per trobar la key del diccionari donat el valor
@@ -322,7 +348,7 @@ def initiate_streamdeck(data):
     print("Found {} Stream Deck(s).\n".format(len(streamdecks)))
 
     for index, deck in enumerate(streamdecks):
-        if index == 1:
+        if index == 0:
             # Afafem només la primera streamdeck
             deck.open()
 
