@@ -203,34 +203,6 @@ def key_change_callback(deck, key, state):
             porta_i = int(porta_num) - 1
             points[porta_i] = porta_punts
             render_screen(deck, porta_num, porta_punts)
-            """
-            # Mirem totes les keys de la streamdeck i les desactivem i activem segons calgui
-            # POTSER ES POT FER SENSE EL FOR SABENT EL NAME DE LA KEY -- NONO CREC QUE NO PER QUE NECESSITEM EL NUMERO...
-            for key in range(deck.key_count()):
-                # si la key pertany a la current porta
-                key_style = get_key_style(deck, key, state)
-                if key_style['label'][:2] == 'P' + porta_num:
-                    porta_num = key_style['name'][0]
-                    porta_punts = key_style['name'][1:]
-                    # tecla actual -- activem
-                    if porta_punts != '-':
-                        if porta_punts == points[porta_i]:
-                            update_key_image(deck, key, True)
-
-                        # una altra tecla de la porta -- desactivem
-                        else:
-                            update_key_image(deck, key, False)
-                    else:
-                        if porta_punts != points[porta_i]:
-                            update_key_image(deck, key, False)
-
-                #Activem també els botons generals
-                elif key_style['name'][-1] == porta_num:
-                    if porta_punts != '-':
-                        update_key_image(deck, key, True)
-                    else:
-                        update_key_image(deck, key, False)
-                        """
 
         # print points screen
         elif (not is_points) and style_name == 'points_folder':
@@ -248,8 +220,8 @@ def key_change_callback(deck, key, state):
             render_screen(deck)
 
 def render_screen(deck, curr_porta = None, curr_point = None):
-    global is_points
-    global points
+    global is_points, points
+
     if not is_points:
         for key in range(deck.key_count()):
             key_style = get_key_style(deck, key, False)
@@ -261,7 +233,37 @@ def render_screen(deck, curr_porta = None, curr_point = None):
 
     elif curr_porta and curr_point:
         porta_i = int(curr_porta) - 1
+        curr_porta = int(curr_porta)
+        # sumem 10 perquè cada fila té 8 keys i comencem a la 2
+        key_ten = curr_porta + 8 + 1
+        key_zero = curr_porta + 8 * 2 + 1
+        key_door = curr_porta + 1
 
+        # si son 10 punts, activem key 10 i la de dalt i desactivem 0
+        if curr_point == '10':
+            # activem 10
+            update_key_image(deck, key_ten, True)
+            # desactivem 0
+            update_key_image(deck, key_zero, False)
+            # activem porta
+            update_key_image(deck, key_door, True)
+
+        elif curr_point == '0':
+            # activem 0
+            update_key_image(deck, key_zero, True)
+            # desactivem 10
+            update_key_image(deck, key_ten, False)
+            # activem porta
+            update_key_image(deck, key_door, True)
+        else:
+            # desactivem 0
+            update_key_image(deck, key_zero, False)
+            # desactivem 10
+            update_key_image(deck, key_ten, False)
+            # desactivem porta
+            update_key_image(deck, key_door, False)
+
+        """
         for key in range(deck.key_count()):
             key_style = get_key_style(deck, key, False)
             # si la key pertany a la current porta
@@ -285,6 +287,7 @@ def render_screen(deck, curr_porta = None, curr_point = None):
                     update_key_image(deck, key, False)
                 else:
                     update_key_image(deck, key, True)
+                    """
 
     # si estem a l'estat inicial dels punts, volem llegir el que hi ha guardat per printar-ho com toca
     else:
